@@ -28,6 +28,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation "io.github.openfeign:feign-okhttp:13.1"
+
 
 }
 
