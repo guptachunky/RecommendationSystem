@@ -1,16 +1,13 @@
 package com.hackfest.RecommendationSystem.controller;
 
-import com.hackfest.RecommendationSystem.dto.MovieDto;
+import com.hackfest.RecommendationSystem.dto.RecommendationDTO;
 import com.hackfest.RecommendationSystem.service.RecommendationService;
 import com.recombee.api_client.bindings.Item;
-import com.recombee.api_client.bindings.RecommendationResponse;
 import com.recombee.api_client.exceptions.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,10 +39,10 @@ public class RecommendationController {
                 .body(recommendationService.createMovieDatabase());
     }
 
-    @PostMapping("/createDummyData")
-    public ResponseEntity<String> createDummyData(@RequestBody List<MovieDto> movieDtoList) {
+    @PostMapping("/populateDataOnRecombee")
+    public ResponseEntity<String> populateDataOnRecombee() {
         return ResponseEntity.ok()
-                .body(recommendationService.createDummyData(movieDtoList));
+                .body(recommendationService.populateDataOnRecombee());
     }
 
     @GetMapping("/getAllData")
@@ -54,17 +51,15 @@ public class RecommendationController {
                 .body(recommendationService.getAllData());
     }
 
-    @GetMapping("/viewMovie")
-    public ResponseEntity<String> viewMovie() {
+    @GetMapping("/view")
+    public ResponseEntity<String> viewMovie(@RequestParam String movieId) {
         return ResponseEntity.ok()
-                .body(recommendationService.userViewedMovies());
+                .body(recommendationService.userViewedMovies(movieId));
     }
 
-    @GetMapping("/recommendations")
-    public ResponseEntity<RecommendationResponse> recommendations() throws ApiException {
+    @GetMapping("/get")
+    public ResponseEntity<RecommendationDTO> recommendations(@RequestParam Integer pageNo) throws ApiException {
         return ResponseEntity.ok()
-                .body(recommendationService.recommendations());
+                .body(recommendationService.recommendations(pageNo));
     }
-
-
 }
