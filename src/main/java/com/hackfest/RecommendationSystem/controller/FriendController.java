@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +20,7 @@ public class FriendController {
     FriendService friendService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addFriend(FriendDto friendDto) {
+    public ResponseEntity<String> addFriend(@RequestBody FriendDto friendDto) {
         return ResponseEntity.ok()
                 .body(friendService.addFriend(friendDto));
     }

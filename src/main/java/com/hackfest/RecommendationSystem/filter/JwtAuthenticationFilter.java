@@ -68,13 +68,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    threadLocalUtil.setRequestTokenDetails(userEmail);
                 } else {
+                    threadLocalUtil.setRequestTokenDetails(userEmail);
                     filterChain.doFilter(request, response);
                     return;
                 }
             }
-
+            threadLocalUtil.setRequestTokenDetails(userEmail);
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
             handlerExceptionResolver.resolveException(request, response, null, new BadRequestException(exception.getMessage()));
