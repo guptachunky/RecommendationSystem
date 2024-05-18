@@ -157,8 +157,11 @@ public class RecommendationService {
 
     public RecommendationDTO recommendations(Integer pageNo) throws ApiException {
         String username = threadLocalUtil.getRequestTokenDetails();
-        RecommendationResponse recommendations = client.send(new RecommendItemsToUser(username, pageNo * 10).setReturnProperties(false));
-        return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(Arrays.asList(recommendations.getIds())));
+        int counter = pageNo * 10;
+        String[] ids = client.send(new RecommendItemsToUser(username, counter)
+                .setReturnProperties(false).setScenario("Trending")).getIds();
+        List<String> list = Arrays.asList(ids).subList(counter - 10, counter);
+        return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(list));
     }
 
     public String createMovieDatabase() {
@@ -185,6 +188,7 @@ public class RecommendationService {
                             put("genres", movie.getGenres());
                             put("voteAverage", movie.getVoteAverage());
                             put("popularity", movie.getPopularity());
+                            put("release_date", movie.getRelease_date());
                         }}
                 ).setCascadeCreate(true); // Use cascadeCreate for creating item
                 moviesData.add(movieData);

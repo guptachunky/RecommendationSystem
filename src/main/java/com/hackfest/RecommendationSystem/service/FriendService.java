@@ -5,13 +5,18 @@ import com.hackfest.RecommendationSystem.dto.RecommendDto;
 import com.hackfest.RecommendationSystem.entity.Friends;
 import com.hackfest.RecommendationSystem.entity.PersonalRecommendation;
 import com.hackfest.RecommendationSystem.entity.RecommendFriend;
+import com.hackfest.RecommendationSystem.entity.User;
 import com.hackfest.RecommendationSystem.repository.FriendRepository;
 import com.hackfest.RecommendationSystem.repository.RecommendationRepository;
 import com.hackfest.RecommendationSystem.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.hackfest.RecommendationSystem.constants.RecommendationConstants.USER_MAP;
 
 @Service
 public class FriendService {
@@ -51,5 +56,19 @@ public class FriendService {
             recommendationRepository.save(recommendFriend.get());
         });
         return "Recommended";
+    }
+
+    public Map<String, String> getMyFriends() {
+        String username = threadLocalUtil.getRequestTokenDetails();
+        Optional<Friends> friends = friendRepository.findById(username);
+        if (friends.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, String> map = new HashMap<>();
+        friends.get().getFriend().forEach(it -> {
+            User user = USER_MAP.get(it);
+            map.put(user.getUsername(), user.getName());
+        });
+        return map;
     }
 }

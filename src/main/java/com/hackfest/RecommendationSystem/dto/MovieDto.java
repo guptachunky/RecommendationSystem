@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class MovieDto {
     Set<String> genres;
     Double popularity;
     Double voteAverage;
+    Date release_date;
     String id;
 
     public MovieDto(Movies movies) {
@@ -23,5 +25,6 @@ public class MovieDto {
         this.id = movies.getId();
         this.voteAverage = movies.getVote_average();
         this.genres = movies.getGenres();
+        this.release_date = movies.getRelease_date();
     }
 }

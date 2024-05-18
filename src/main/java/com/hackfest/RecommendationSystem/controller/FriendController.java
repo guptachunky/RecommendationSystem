@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +31,12 @@ public class FriendController {
     public ResponseEntity<String> addFriend(@RequestBody RecommendDto recommendDto) {
         return ResponseEntity.ok()
                 .body(friendService.recommendFriend(recommendDto));
+    }
+
+    @GetMapping("/myFriends")
+    public ResponseEntity<Map<String, String>> getFriend() {
+        return ResponseEntity.ok()
+                .body(friendService.getMyFriends());
     }
 
 }
