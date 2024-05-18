@@ -18,9 +18,4 @@ public class WatchHistory {
     String username;
 
     Set<MovieWatchTime> movieWatched = new HashSet<>();
-
-    public WatchHistory(String username, MovieWatchTime movieWatchTime) {
-        this.username = username;
-        this.movieWatched.add(movieWatchTime);
-    }
 }

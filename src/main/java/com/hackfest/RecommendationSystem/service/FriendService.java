@@ -2,19 +2,15 @@ package com.hackfest.RecommendationSystem.service;
 
 import com.hackfest.RecommendationSystem.dto.FriendDto;
 import com.hackfest.RecommendationSystem.dto.RecommendDto;
-import com.hackfest.RecommendationSystem.entity.Friends;
-import com.hackfest.RecommendationSystem.entity.PersonalRecommendation;
-import com.hackfest.RecommendationSystem.entity.RecommendFriend;
-import com.hackfest.RecommendationSystem.entity.User;
+import com.hackfest.RecommendationSystem.entity.*;
 import com.hackfest.RecommendationSystem.repository.FriendRepository;
+import com.hackfest.RecommendationSystem.repository.MovieRepository;
 import com.hackfest.RecommendationSystem.repository.RecommendationRepository;
 import com.hackfest.RecommendationSystem.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.hackfest.RecommendationSystem.constants.RecommendationConstants.USER_MAP;
 
@@ -28,6 +24,8 @@ public class FriendService {
     FriendRepository friendRepository;
     @Autowired
     RecommendationRepository recommendationRepository;
+    @Autowired
+    private MovieRepository movieRepository;
 
     public Boolean addFriend(FriendDto friendDtos) {
         String username = threadLocalUtil.getRequestTokenDetails();
@@ -79,5 +77,15 @@ public class FriendService {
             map.put(user.getUsername(), user.getName());
         });
         return map;
+    }
+
+    public List<Movies> fromFriends() {
+        String username = threadLocalUtil.getRequestTokenDetails();
+        Optional<RecommendFriend> recommendFriend = recommendationRepository.findById(username);
+        if (recommendFriend.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> recommendations = recommendFriend.get().getRecommendations().stream().map(PersonalRecommendation::getMovieId).toList();
+        return movieRepository.findAllByIdIn(recommendations);
     }
 }
