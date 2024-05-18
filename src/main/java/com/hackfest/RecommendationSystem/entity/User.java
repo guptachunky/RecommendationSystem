@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
 
@@ -24,6 +25,11 @@ public class User implements UserDetails {
         this.password = userDTO.getPassword();
     }
 
+    public User(String username, String name, String password) {
+        this.username = username;
+        this.name = name;
+        this.password = new BCryptPasswordEncoder().encode(password);
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

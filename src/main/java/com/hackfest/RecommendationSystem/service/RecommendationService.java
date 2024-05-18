@@ -120,6 +120,26 @@ public class RecommendationService {
         }
     }
 
+    public String userViewedMovies() {
+        try {
+            final Random rand = new Random();
+            ArrayList<Request> addPurchaseRequests = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                AddPurchase req = new AddPurchase("chunkygupta", String.valueOf(rand.nextInt(50)))
+                        .setCascadeCreate(true); //use cascadeCreate to create the users
+                addPurchaseRequests.add(req);
+            }
+            client.send(new Batch(addPurchaseRequests)); // Send purchases to the recommender system
+            return "Creation Completed";
+        } catch (ApiException e) {
+            return "Creation Failed";
+        }
+    }
+
+    public RecommendationResponse recommendations() throws ApiException {
+        return client.send(new RecommendItemsToUser("chunkygupta", 5).setReturnProperties(true));
+    }
+
     public String createMovieDatabase() {
         try {
             client.send(new AddItemProperty("title", "string"));
