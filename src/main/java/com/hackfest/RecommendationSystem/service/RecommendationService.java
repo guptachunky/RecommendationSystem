@@ -1,6 +1,9 @@
 package com.hackfest.RecommendationSystem.service;
 
 import com.hackfest.RecommendationSystem.dto.MovieDto;
+import com.hackfest.RecommendationSystem.dto.RecommendationDTO;
+import com.hackfest.RecommendationSystem.repository.MovieRepository;
+import com.hackfest.RecommendationSystem.utils.ThreadLocalUtil;
 import com.recombee.api_client.RecombeeClient;
 import com.recombee.api_client.api_requests.*;
 import com.recombee.api_client.bindings.Item;
@@ -10,13 +13,13 @@ import com.recombee.api_client.bindings.SearchResponse;
 import com.recombee.api_client.exceptions.ApiException;
 import com.recombee.api_client.util.Region;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import static com.hackfest.RecommendationSystem.constants.RecommendationConstants.USER_MAP;
 
 @Service
 public class RecommendationService {
@@ -26,6 +29,13 @@ public class RecommendationService {
     private String token;
 
     RecombeeClient client = null;
+    private final MovieRepository movieRepository;
+    @Autowired
+    ThreadLocalUtil threadLocalUtil;
+
+    public RecommendationService(MovieRepository movieRepository) {
+        this.movieRepository = movieRepository;
+    }
 
     @PostConstruct
     public void init() {
@@ -40,6 +50,17 @@ public class RecommendationService {
         } catch (ApiException e) {
             return "Reset failed";
         }
+    }
+
+    public String addUsers() {
+        USER_MAP.keySet().forEach(it -> {
+            try {
+                client.send(new AddUser(it));
+            } catch (ApiException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return "Users Added";
     }
 
     public String createDatabase() {
@@ -120,61 +141,50 @@ public class RecommendationService {
         }
     }
 
-    public String userViewedMovies() {
+    public String userViewedMovies(String movieId) {
         try {
-            final Random rand = new Random();
+            String username = threadLocalUtil.getRequestTokenDetails();
             ArrayList<Request> addPurchaseRequests = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                AddPurchase req = new AddPurchase("chunkygupta", String.valueOf(rand.nextInt(50)))
-                        .setCascadeCreate(true); //use cascadeCreate to create the users
-                addPurchaseRequests.add(req);
-            }
+            AddPurchase req = new AddPurchase(username, movieId)
+                    .setCascadeCreate(true);
+            addPurchaseRequests.add(req);
             client.send(new Batch(addPurchaseRequests)); // Send purchases to the recommender system
-            return "Creation Completed";
+            return "Movie Viewed";
         } catch (ApiException e) {
             return "Creation Failed";
         }
     }
 
-    public RecommendationResponse recommendations() throws ApiException {
-        return client.send(new RecommendItemsToUser("chunkygupta", 5).setReturnProperties(true));
+    public RecommendationDTO recommendations(Integer pageNo) throws ApiException {
+        String username = threadLocalUtil.getRequestTokenDetails();
+        RecommendationResponse recommendations = client.send(new RecommendItemsToUser(username, pageNo * 10).setReturnProperties(false));
+        return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(Arrays.asList(recommendations.getIds())));
     }
 
     public String createMovieDatabase() {
         try {
             client.send(new AddItemProperty("title", "string"));
-            client.send(new AddItemProperty("year", "int"));
             client.send(new AddItemProperty("genres", "set"));
-            client.send(new AddItemProperty("poster", "string"));
-            client.send(new AddItemProperty("duration", "string"));
-            client.send(new AddItemProperty("storyline", "string"));
-            client.send(new AddItemProperty("actors", "set"));
-            client.send(new AddItemProperty("posterurl", "string"));
-            client.send(new AddItemProperty("imdbRating", "double"));
+            client.send(new AddItemProperty("voteAverage", "double"));
+            client.send(new AddItemProperty("popularity", "double"));
             return "Creation Completed";
         } catch (ApiException e) {
             return "Creation Failed";
         }
     }
 
-    public String createDummyData(List<MovieDto> movieDtoList) {
-
+    public String populateDataOnRecombee() {
+        List<MovieDto> movieDtoList = movieRepository.findAll().stream().map(MovieDto::new).toList();
         try {
             final ArrayList<Request> moviesData = new ArrayList<>();
-            for (int i = 0; i < movieDtoList.size(); i++) {
-                MovieDto movie = movieDtoList.get(i);
+            for (MovieDto movie : movieDtoList) {
                 final SetItemValues movieData = new SetItemValues(
-                        String.valueOf(i),
+                        movie.getId(),
                         new HashMap<>() {{
                             put("title", movie.getTitle());
-                            put("year", movie.getYear());
                             put("genres", movie.getGenres());
-                            put("duration", movie.getDuration());
-                            put("storyline", movie.getStoryline());
-                            put("actors", movie.getActors());
-                            put("posterurl", movie.getPosterurl());
-                            put("imdbRating", movie.getImdbRating());
-                            put("poster", "kuch bhi");
+                            put("voteAverage", movie.getVoteAverage());
+                            put("popularity", movie.getPopularity());
                         }}
                 ).setCascadeCreate(true); // Use cascadeCreate for creating item
                 moviesData.add(movieData);
@@ -187,14 +197,6 @@ public class RecommendationService {
     }
 
     public Item[] getAllData() {
-        try {
-            return client.send(new ListItems().setCount(10).setReturnProperties(true));
-        } catch (ApiException e) {
-            return null;
-        }
-    }
-
-    public Item[] getFilteredData() {
         try {
             return client.send(new ListItems().setCount(10).setReturnProperties(true));
         } catch (ApiException e) {

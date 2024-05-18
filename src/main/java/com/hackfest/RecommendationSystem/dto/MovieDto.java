@@ -1,5 +1,6 @@
 package com.hackfest.RecommendationSystem.dto;
 
+import com.hackfest.RecommendationSystem.entity.Movies;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -11,11 +12,16 @@ import java.util.Set;
 @Setter
 public class MovieDto {
     String title;
-    Integer year;
     Set<String> genres;
-    String duration;
-    String storyline;
-    Set<String> actors;
-    String posterurl;
-    Double imdbRating;
+    Double popularity;
+    Double voteAverage;
+    String id;
+
+    public MovieDto(Movies movies) {
+        this.popularity = movies.getPopularity();
+        this.title = movies.getTitle();
+        this.id = movies.getId();
+        this.voteAverage = movies.getVote_average();
+        this.genres = movies.getGenres();
+    }
 }
