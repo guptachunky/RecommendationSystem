@@ -3,6 +3,8 @@ package com.hackfest.RecommendationSystem.controller;
 import com.hackfest.RecommendationSystem.dto.MovieDto;
 import com.hackfest.RecommendationSystem.service.RecommendationService;
 import com.recombee.api_client.bindings.Item;
+import com.recombee.api_client.bindings.RecommendationResponse;
+import com.recombee.api_client.exceptions.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,18 @@ public class RecommendationController {
     public ResponseEntity<Item[]> getAllData() {
         return ResponseEntity.ok()
                 .body(recommendationService.getAllData());
+    }
+
+    @GetMapping("/viewMovie")
+    public ResponseEntity<String> viewMovie() {
+        return ResponseEntity.ok()
+                .body(recommendationService.userViewedMovies());
+    }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<RecommendationResponse> recommendations() throws ApiException {
+        return ResponseEntity.ok()
+                .body(recommendationService.recommendations());
     }
 
 
