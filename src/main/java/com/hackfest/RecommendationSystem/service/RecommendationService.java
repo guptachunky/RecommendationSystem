@@ -2,7 +2,10 @@ package com.hackfest.RecommendationSystem.service;
 
 import com.hackfest.RecommendationSystem.dto.MovieDto;
 import com.hackfest.RecommendationSystem.dto.RecommendationDTO;
+import com.hackfest.RecommendationSystem.entity.MovieWatchTime;
+import com.hackfest.RecommendationSystem.entity.WatchHistory;
 import com.hackfest.RecommendationSystem.repository.MovieRepository;
+import com.hackfest.RecommendationSystem.repository.WatchHistoryRepository;
 import com.hackfest.RecommendationSystem.utils.ThreadLocalUtil;
 import com.recombee.api_client.RecombeeClient;
 import com.recombee.api_client.api_requests.*;
@@ -30,8 +33,11 @@ public class RecommendationService {
 
     RecombeeClient client = null;
     private final MovieRepository movieRepository;
+
     @Autowired
     ThreadLocalUtil threadLocalUtil;
+    @Autowired
+    WatchHistoryRepository watchHistoryRepository;
 
     public RecommendationService(MovieRepository movieRepository) {
         this.movieRepository = movieRepository;
@@ -149,6 +155,13 @@ public class RecommendationService {
                     .setCascadeCreate(true);
             addPurchaseRequests.add(req);
             client.send(new Batch(addPurchaseRequests)); // Send purchases to the recommender system
+            Optional<WatchHistory> watchHistory = watchHistoryRepository.findById(username);
+            if (watchHistory.isEmpty()) {
+                watchHistory = Optional.of(new WatchHistory());
+                watchHistory.get().setUsername(username);
+            }
+            watchHistory.get().getMovieWatched().add(new MovieWatchTime(movieId));
+            watchHistoryRepository.save(watchHistory.get());
             return "Movie Viewed";
         } catch (ApiException e) {
             return "Creation Failed";
@@ -206,5 +219,16 @@ public class RecommendationService {
         } catch (ApiException e) {
             return null;
         }
+    }
+
+    public RecommendationDTO watchHistory(Integer pageNo) {
+        String username = threadLocalUtil.getRequestTokenDetails();
+        Optional<WatchHistory> watchHistory = watchHistoryRepository.findById(username);
+        if (watchHistory.isEmpty()) {
+            return new RecommendationDTO(pageNo);
+        }
+        Set<MovieWatchTime> movieWatchTimes = watchHistory.get().getMovieWatched();
+        List<String> movieIds = movieWatchTimes.stream().sorted().map(MovieWatchTime::getMovieId).toList().subList((pageNo - 1) * 10, movieWatchTimes.size());
+        return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(movieIds));
     }
 }

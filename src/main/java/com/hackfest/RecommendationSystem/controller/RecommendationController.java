@@ -62,4 +62,10 @@ public class RecommendationController {
         return ResponseEntity.ok()
                 .body(recommendationService.recommendations(pageNo));
     }
+
+    @GetMapping("/history")
+    public ResponseEntity<RecommendationDTO> history(@RequestParam Integer pageNo) throws ApiException {
+        return ResponseEntity.ok()
+                .body(recommendationService.watchHistory(pageNo));
+    }
 }

@@ -19,4 +19,8 @@ public class RecommendationDTO {
         this.results = movies;
         this.total_pages = this.total_results = 1500;
     }
+    public RecommendationDTO(Integer page) {
+        this.page = page;
+        this.total_pages = this.total_results = 1500;
+    }
 }
