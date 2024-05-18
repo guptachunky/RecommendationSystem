@@ -23,8 +23,15 @@ public class FriendController {
 
     @PostMapping("/add")
     public ResponseEntity<String> addFriend(@RequestBody FriendDto friendDto) {
-        return ResponseEntity.ok()
-                .body(friendService.addFriend(friendDto));
+        Boolean success = friendService.addFriend(friendDto);
+        if (Boolean.TRUE.equals(success)) {
+            return ResponseEntity.ok()
+                    .body("Saved Success");
+        } else {
+            return ResponseEntity.badRequest()
+                    .body("Failure");
+        }
+
     }
 
     @PostMapping("/recommend")

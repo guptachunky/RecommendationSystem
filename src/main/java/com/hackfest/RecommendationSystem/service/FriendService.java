@@ -29,16 +29,25 @@ public class FriendService {
     @Autowired
     RecommendationRepository recommendationRepository;
 
-    public String addFriend(FriendDto friendDtos) {
+    public Boolean addFriend(FriendDto friendDtos) {
         String username = threadLocalUtil.getRequestTokenDetails();
         Optional<Friends> friends = friendRepository.findById(username);
         if (friends.isEmpty()) {
             friends = Optional.of(new Friends());
             friends.get().setUsername(username);
         }
-        friends.get().getFriend().addAll(friendDtos.getUsername());
+        boolean isSuccess = false;
+        if (friendDtos.getUsername() != null && !friendDtos.getUsername().isEmpty()) {
+            for (String friendUsername : friendDtos.getUsername()) {
+                if (USER_MAP.containsKey(friendUsername)) {
+                    friends.get().getFriend().add(friendUsername);
+                    isSuccess = true;
+                }
+
+            }
+        }
         friendRepository.save(friends.get());
-        return "Saved";
+        return isSuccess;
     }
 
     public String recommendFriend(RecommendDto recommendDto) {
