@@ -58,7 +58,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<RecommendationDTO> recommendations(@RequestParam Integer pageNo, @RequestParam Integer with_genres) throws ApiException {
+    public ResponseEntity<RecommendationDTO> recommendations(@RequestParam Integer pageNo, @RequestParam(required = false) Integer with_genres) throws ApiException {
         return ResponseEntity.ok()
                 .body(recommendationService.recommendations(pageNo, with_genres));
     }
