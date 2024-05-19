@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.hackfest.RecommendationSystem.constants.RecommendationConstants.GENRE_MAP;
 import static com.hackfest.RecommendationSystem.constants.RecommendationConstants.USER_MAP;
 
 @Service
@@ -168,11 +169,16 @@ public class RecommendationService {
         }
     }
 
-    public RecommendationDTO recommendations(Integer pageNo) throws ApiException {
+    public RecommendationDTO recommendations(Integer pageNo, Integer genreId) throws ApiException {
         String username = threadLocalUtil.getRequestTokenDetails();
         int counter = pageNo * 10;
-        String[] ids = client.send(new RecommendItemsToUser(username, counter)
-                .setReturnProperties(false).setScenario("Trending")).getIds();
+        RecommendItemsToUser recommendItemsToUser = new RecommendItemsToUser(username, counter)
+                .setReturnProperties(false).setScenario("Trending");
+        if (genreId != null) {
+            String genre = GENRE_MAP.get(genreId);
+            recommendItemsToUser.setFilter("\"" + genre+ "\" in 'genres'");
+        }
+        String[] ids = client.send(recommendItemsToUser).getIds();
         List<String> list = Arrays.asList(ids).subList(counter - 10, counter);
         return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(list));
     }

@@ -58,13 +58,13 @@ public class RecommendationController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<RecommendationDTO> recommendations(@RequestParam Integer pageNo) throws ApiException {
+    public ResponseEntity<RecommendationDTO> recommendations(@RequestParam Integer pageNo, @RequestParam Integer with_genres) throws ApiException {
         return ResponseEntity.ok()
-                .body(recommendationService.recommendations(pageNo));
+                .body(recommendationService.recommendations(pageNo, with_genres));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<RecommendationDTO> history(@RequestParam Integer pageNo) throws ApiException {
+    public ResponseEntity<RecommendationDTO> history(@RequestParam Integer pageNo) {
         return ResponseEntity.ok()
                 .body(recommendationService.watchHistory(pageNo));
     }
