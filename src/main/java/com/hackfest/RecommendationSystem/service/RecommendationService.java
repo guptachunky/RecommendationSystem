@@ -3,6 +3,7 @@ package com.hackfest.RecommendationSystem.service;
 import com.hackfest.RecommendationSystem.dto.MovieDto;
 import com.hackfest.RecommendationSystem.dto.RecommendationDTO;
 import com.hackfest.RecommendationSystem.entity.MovieWatchTime;
+import com.hackfest.RecommendationSystem.entity.Movies;
 import com.hackfest.RecommendationSystem.entity.WatchHistory;
 import com.hackfest.RecommendationSystem.repository.MovieRepository;
 import com.hackfest.RecommendationSystem.repository.WatchHistoryRepository;
@@ -227,14 +228,14 @@ public class RecommendationService {
         }
     }
 
-    public RecommendationDTO watchHistory(Integer pageNo) {
+    public List<Movies> watchHistory() {
         String username = threadLocalUtil.getRequestTokenDetails();
         Optional<WatchHistory> watchHistory = watchHistoryRepository.findById(username);
         if (watchHistory.isEmpty()) {
-            return new RecommendationDTO(pageNo);
+            return new ArrayList<>();
         }
         Set<MovieWatchTime> movieWatchTimes = watchHistory.get().getMovieWatched();
-        List<String> movieIds = movieWatchTimes.stream().sorted().map(MovieWatchTime::getMovieId).toList().subList((pageNo - 1) * 10, movieWatchTimes.size());
-        return new RecommendationDTO(pageNo, movieRepository.findAllByIdIn(movieIds));
+        List<String> movieIds = movieWatchTimes.stream().sorted().map(MovieWatchTime::getMovieId).toList();
+        return movieRepository.findAllByIdIn(movieIds);
     }
 }

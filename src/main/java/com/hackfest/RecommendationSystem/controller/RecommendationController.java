@@ -1,6 +1,7 @@
 package com.hackfest.RecommendationSystem.controller;
 
 import com.hackfest.RecommendationSystem.dto.RecommendationDTO;
+import com.hackfest.RecommendationSystem.entity.Movies;
 import com.hackfest.RecommendationSystem.service.RecommendationService;
 import com.recombee.api_client.bindings.Item;
 import com.recombee.api_client.exceptions.ApiException;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,8 +66,8 @@ public class RecommendationController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<RecommendationDTO> history(@RequestParam Integer pageNo) {
+    public ResponseEntity<List<Movies>> history() {
         return ResponseEntity.ok()
-                .body(recommendationService.watchHistory(pageNo));
+                .body(recommendationService.watchHistory());
     }
 }
